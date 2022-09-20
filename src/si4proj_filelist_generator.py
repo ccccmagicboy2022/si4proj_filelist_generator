@@ -171,7 +171,7 @@ def scan_files(url):
                 print(url)
                 pass
 
-ext_set = ['.c', '.h', '.cpp', '.hpp', '.cs', '.py']
+ext_set = ['.c', '.h', '.cpp', '.hpp', '.cs', '.py', '.m', '.v']
 __version__ = "1.0.2"
 install()
 
