@@ -1,6 +1,6 @@
 source insight 4 file list generator工具
 0. 遍历目标目录及其子目录(默认目录为exe所在目录)；
-1. 支持的文件扩展名包括：*.c;*.cpp;*.h;*.hpp;*.cs;*.py；
+1. 支持的文件扩展名包括：*.c;*.cpp;*.h;*.hpp;*.cs;*.py;*.m；
 2. 支持keil4/5模式及iar模式
 
 
