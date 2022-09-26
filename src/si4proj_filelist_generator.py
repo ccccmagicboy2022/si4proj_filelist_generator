@@ -23,6 +23,7 @@ TargetName = ''
 
 def find_dep_file(url):
     global TargetName
+    sourcefile = ''
     if path.isfile(url):
         ext = os.path.splitext(url)[-1].lower()
         if ext == '.eww':
@@ -43,9 +44,10 @@ def find_dep_file(url):
                 return ('', '')
         elif ext == '.uvproj' or ext == '.uvprojx':
             if ext == '.uvproj':
-                uvoptfile = os.path.join(os.path.splitext(url)[0], '.uvopt')
+                uvoptfile = url.replace('.uvproj', '.uvopt')
             elif ext == '.uvprojx':
-                uvoptfile = os.path.join(os.path.splitext(url)[0], '.uvoptx')
+                uvoptfile = url.replace('.uvprojx', '.uvoptx')
+            print(uvoptfile)
             tree = ET.ElementTree(file=uvoptfile)
             for tag in tree.findall('Target'):
                 TargetOption = tag.find('TargetOption')
@@ -69,9 +71,11 @@ def find_dep_file(url):
                         TargetCommonOption = TargetOption.find('TargetCommonOption')
                         OutputDirectory = TargetCommonOption.find('OutputDirectory').text
                         OutputDirectory = os.path.normpath(os.path.join(os.path.split(url)[0], OutputDirectory))
-
+                        print(OutputDirectory)
                         depfilename = os.path.splitext(url)[0] + '_' + TargetName + '.dep'
+                        depfilename = os.path.split(depfilename)[-1]
                         depfilename = os.path.join(OutputDirectory, depfilename)
+                        print(depfilename)
 
                         if os.path.exists(depfilename):
                             sourcefile = depfilename
@@ -83,7 +87,7 @@ def find_dep_file(url):
         return ('', '')
 
 
-def dep_to_list(url, mode, target_str):
+def dep_to_list(uuu, url, mode, target_str):
     global line_set
     with open(url, 'r') as parsefile:
         if mode == IAR_PJ:
@@ -102,7 +106,7 @@ def dep_to_list(url, mode, target_str):
                 m = re.search(r"^F \(.*?\)|^I \(.*?\)", line)
                 if None != m:
                     relpath = m.group(0)[3:-1]
-                    line_set.append(os.path.abspath(relpath)+'\n')
+                    line_set.append(os.path.abspath(os.path.join(os.path.split(uuu)[0], relpath)))
 
 def save_list(url):
     global line_set
@@ -141,19 +145,19 @@ def scan_files(url):
             print('IAR Embedded Workbench IDE(IAR for Arm) project file: ')
             print(url)
             dep_name, target = find_dep_file(url)
-            dep_to_list(dep_name, IAR_PJ, target)
+            dep_to_list(url, dep_name, IAR_PJ, target)
             pass
         elif ext == '.uvproj':
             print('Keil4 project file: ')
             print(url)
             dep_name, target = find_dep_file(url)
-            dep_to_list(dep_name, KEIL4_PJ, target)
+            dep_to_list(url, dep_name, KEIL4_PJ, target)
             pass
         elif ext == '.uvprojx':
             print('Keil5 project file: ')
             print(url)
             dep_name, target = find_dep_file(url)
-            dep_to_list(dep_name, KEIL5_PJ, target)
+            dep_to_list(url, dep_name, KEIL5_PJ, target)
             pass
         else:
             typer.secho(f"Not support project file: {url}", fg=typer.colors.BRIGHT_WHITE, bg=typer.colors.RED)
