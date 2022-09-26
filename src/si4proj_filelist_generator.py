@@ -27,13 +27,14 @@ def find_dep_file(url):
         ext = os.path.splitext(url)[-1].lower()
         if ext == '.eww':
             wsdtfile = os.path.join(os.path.split(url)[0], 'settings')
-            wsdtfile = os.path.join(wsdtfile, url.replace('.eww', '.wsdt'))            
+            wsdtfile = os.path.join(wsdtfile, os.path.split(url)[-1].replace('.eww', '.wsdt'))
             if os.path.exists(wsdtfile):
                 tree = ET.ElementTree(file=wsdtfile)
                 ConfigDictionary = tree.find('ConfigDictionary')
                 CurrentConfigs = ConfigDictionary.find('CurrentConfigs')
                 TargetName = CurrentConfigs.find('Project').text.split('/')[1]
                 depfilename = CurrentConfigs.find('Project').text.split('/')[0] + '.dep'
+                depfilename = os.path.join(os.path.split(url)[0], depfilename)
                 if os.path.exists(depfilename):
                     return (depfilename, TargetName)
                 else:
@@ -94,7 +95,7 @@ def dep_to_list(url, mode, target_str):
                     for elem in output_tag.findall('file'):
                         if elem.text.startswith('$PROJ_DIR$'):
                             if elem.text.endswith('.c') or elem.text.endswith('.s') or elem.text.endswith('.h'):
-                                line_set.append(os.path.abspath(elem.text.replace('$PROJ_DIR$', os.getcwd()))+'\n')
+                                line_set.append(os.path.abspath(elem.text.replace('$PROJ_DIR$', os.path.split(url)[0])))
                     break
         elif mode == KEIL4_PJ or mode == KEIL5_PJ:
             for line in parsefile.readlines():
@@ -175,7 +176,7 @@ def main(version: Optional[bool] = typer.Option(None, "--version", '-v', callbac
     if os.path.isdir(path):
         save_list(os.path.join(path, 'si4project_filelist.txt'))
     else:
-        save_list(os.path.join(os.path.split(url)[0], 'si4project_filelist.txt'))
+        save_list(os.path.join(os.path.split(path)[0], 'si4project_filelist.txt'))
 
 if __name__ == '__main__':
     install()
