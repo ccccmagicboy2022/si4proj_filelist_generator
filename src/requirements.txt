@@ -2,5 +2,4 @@ typer==0.3.2
 rich==10.12.0
 pyinstaller==4.6
 tqdm==4.62.3
-
-
+pywin32==304

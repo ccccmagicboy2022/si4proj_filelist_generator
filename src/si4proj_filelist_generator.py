@@ -7,6 +7,7 @@ from rich.traceback import install
 import sys
 import xml.etree.ElementTree as ET
 from datetime import datetime
+import win32api,win32con
 
 IAR_PJ      =   0
 KEIL4_PJ    =   1
@@ -15,7 +16,7 @@ KEIL5_PJ    =   2
 global line_set
 line_set = []
 global ext_set
-ext_set = ['.c', '.h', '.cpp', '.hpp', '.cs', '.py', '.m', '.v']
+ext_set = ['.c', '.h', '.cpp', '.hpp', '.cs', '.py', '.m', '.v', '.json', '.xml']
 global __version__
 __version__ = "1.0.2"
 global TargetName
@@ -145,7 +146,10 @@ def scan_files(url):
             print('IAR Embedded Workbench IDE(IAR for Arm) project file: ')
             print(url)
             dep_name, target = find_dep_file(url)
-            dep_to_list(url, dep_name, IAR_PJ, target)
+            if dep_name != '':
+                dep_to_list(url, dep_name, IAR_PJ, target)
+            else:
+                win32api.MessageBox(0, "build the project first!!!", "warning", win32con.MB_ICONWARNING)
             pass
         elif ext == '.uvproj':
             print('Keil4 project file: ')
@@ -176,11 +180,15 @@ def main(version: Optional[bool] = typer.Option(None, "--version", '-v', callbac
     """
     Simple program that generate the source insight 4 file list. Support c/c++ matlab python cs and keil/iar IDE project files.
     """
+    path = os.path.abspath(path)
     scan_files(path)
     if os.path.isdir(path):
-        save_list(os.path.join(path, 'si4project_filelist.txt'))
+        if os.path.split(path)[-1] == '':
+            save_list(os.path.join(path, os.path.split(path)[-2] + '_filelist.txt'))
+        else:
+            save_list(os.path.join(path, os.path.split(path)[-1] + '_filelist.txt'))
     else:
-        save_list(os.path.join(os.path.split(path)[0], 'si4project_filelist.txt'))
+        save_list(os.path.join(os.path.split(path)[0], os.path.splitext(os.path.split(path)[-1])[0] + '_filelist.txt'))
 
 if __name__ == '__main__':
     install()
