@@ -7,7 +7,9 @@ from rich.traceback import install
 import sys
 import xml.etree.ElementTree as ET
 from datetime import datetime
-import win32api,win32con
+import win32api
+import win32con
+import ctypes
 
 IAR_PJ      =   0
 KEIL4_PJ    =   1
@@ -149,20 +151,23 @@ def scan_files(url):
             if dep_name != '':
                 dep_to_list(url, dep_name, IAR_PJ, target)
             else:
-                win32api.MessageBox(0, "build the project first!!!", "warning", win32con.MB_ICONWARNING)
-            pass
+                win32api.MessageBox(0, "build the IAR project first!!!", "warning", win32con.MB_ICONWARNING)
         elif ext == '.uvproj':
             print('Keil4 project file: ')
             print(url)
             dep_name, target = find_dep_file(url)
-            dep_to_list(url, dep_name, KEIL4_PJ, target)
-            pass
+            if dep_name != '':
+                dep_to_list(url, dep_name, KEIL4_PJ, target)
+            else:
+                win32api.MessageBox(0, "build the KEIL4 project first!!!", "warning", win32con.MB_ICONWARNING)
         elif ext == '.uvprojx':
             print('Keil5 project file: ')
             print(url)
             dep_name, target = find_dep_file(url)
-            dep_to_list(url, dep_name, KEIL5_PJ, target)
-            pass
+            if dep_name != '':
+                dep_to_list(url, dep_name, KEIL5_PJ, target)
+            else:
+                win32api.MessageBox(0, "build the KEIL5 project first!!!", "warning", win32con.MB_ICONWARNING)
         else:
             typer.secho(f"Not support project file: {url}", fg=typer.colors.BRIGHT_WHITE, bg=typer.colors.RED)
             pass
@@ -191,5 +196,8 @@ def main(version: Optional[bool] = typer.Option(None, "--version", '-v', callbac
         save_list(os.path.join(os.path.split(path)[0], os.path.splitext(os.path.split(path)[-1])[0] + '_filelist.txt'))
 
 if __name__ == '__main__':
+    dll = ctypes.CDLL('shcore.dll')
+    if dll:
+        dll.SetProcessDpiAwareness(2)
     install()
     typer.run(main)
